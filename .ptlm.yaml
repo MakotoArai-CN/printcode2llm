@@ -1,0 +1,293 @@
+language_map:
+    .bash: shell
+    .c: c
+    .cpp: cpp
+    .css: css
+    .dart: dart
+    .go: go
+    .h: c
+    .hpp: cpp
+    .html: html
+    .ini: ini
+    .java: java
+    .js: javascript
+    .json: json
+    .jsx: javascript
+    .kt: kotlin
+    .less: less
+    .md: markdown
+    .php: php
+    .ps1: powershell
+    .py: python
+    .rb: ruby
+    .rs: rust
+    .scss: scss
+    .sh: shell
+    .sql: sql
+    .svelte: svelte
+    .swift: swift
+    .toml: toml
+    .ts: typescript
+    .tsx: typescript
+    .txt: text
+    .vue: vue
+    .xml: xml
+    .yaml: yaml
+    .yml: yaml
+default_ignore:
+    - node_modules
+    - vendor
+    - venv
+    - .venv
+    - env
+    - .env
+    - __pycache__
+    - .git
+    - .svn
+    - .hg
+    - .vscode
+    - .idea
+    - .vs
+    - .eclipse
+    - dist
+    - dist-*
+    - build
+    - out
+    - bin
+    - target
+    - coverage
+    - .gradle
+    - .DS_Store
+    - Thumbs.db
+    - desktop.ini
+    - assets
+    - static
+    - public
+    - doc
+    - docs
+    - package-lock.json
+    - yarn.lock
+    - Gemfile.lock
+    - Cargo.lock
+    - go.sum
+    - '*.log'
+    - logs
+    - tmp
+    - temp
+    - .cache
+    - '*.tmp'
+    - '*.bak'
+    - '*.swp'
+    - '*.swo'
+    - '*.swn'
+    - '*.old'
+    - LLM_CODE*.md
+binary_extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .bmp
+    - .svg
+    - .ico
+    - .webp
+    - .tiff
+    - .tif
+    - .psd
+    - .ai
+    - .eps
+    - .raw
+    - .cr2
+    - .nef
+    - .heic
+    - .heif
+    - .mp4
+    - .avi
+    - .mov
+    - .wmv
+    - .flv
+    - .mkv
+    - .webm
+    - .m4v
+    - .3gp
+    - .mpg
+    - .mpeg
+    - .vob
+    - .ogv
+    - .mp3
+    - .wav
+    - .ogg
+    - .flac
+    - .aac
+    - .m4a
+    - .wma
+    - .ape
+    - .alac
+    - .opus
+    - .mid
+    - .midi
+    - .pdf
+    - .doc
+    - .docx
+    - .ppt
+    - .pptx
+    - .xls
+    - .xlsx
+    - .odt
+    - .ods
+    - .odp
+    - .pages
+    - .numbers
+    - .key
+    - .zip
+    - .tar
+    - .gz
+    - .rar
+    - .7z
+    - .iso
+    - .dmg
+    - .tgz
+    - .bz2
+    - .xz
+    - .cab
+    - .deb
+    - .rpm
+    - .pkg
+    - .msi
+    - .exe
+    - .dll
+    - .so
+    - .dylib
+    - .lib
+    - .a
+    - .app
+    - .bat
+    - .cmd
+    - .com
+    - .jar
+    - .war
+    - .ear
+    - .apk
+    - .ipa
+    - .aab
+    - .aar
+    - .nupkg
+    - .snap
+    - .pth
+    - .pt
+    - .onnx
+    - .pb
+    - .tflite
+    - .h5
+    - .hdf5
+    - .caffemodel
+    - .mlmodel
+    - .savedmodel
+    - .pyc
+    - .pyd
+    - .o
+    - .obj
+    - .class
+    - .wasm
+    - .elc
+    - .rbc
+    - .ttf
+    - .otf
+    - .woff
+    - .woff2
+    - .eot
+    - .fon
+    - .fnt
+    - .db
+    - .sqlite
+    - .sqlite3
+    - .mdb
+    - .accdb
+    - .frm
+    - .ibd
+    - .dbf
+    - .parquet
+    - .feather
+    - .arrow
+    - .avro
+    - .protobuf
+    - .msgpack
+    - .pickle
+    - .pkl
+    - .npy
+    - .npz
+    - .mat
+    - .rds
+    - .rda
+    - .RData
+non_code_extensions:
+    - .md
+    - .txt
+    - .log
+    - .csv
+    - .json
+    - .xml
+    - .yml
+    - .yaml
+    - .toml
+    - .ini
+    - .conf
+    - .config
+custom_ignore:
+    patterns: []
+    regex: []
+output:
+    max_chars: 50000
+    compress: true
+    ultra_compress: false
+    split_mode: file
+    include_tree: true
+    output_prefix: LLM_CODE
+prompts:
+    section_info: 项目概况
+    section_tree: 目录结构
+    section_code: 源码清单
+    section_stats: 数据统计
+    header_prompt: |
+        ## 阅读须知
+
+        这是一个项目源码整理文档，包含完整的代码文件。
+
+        **处理建议：**
+        - 如需修改代码，请保持原有结构和注释
+        - 除非明确要求，否则只做必要的改动
+        - 返回代码时使用完整实现，避免省略
+        - 保持原项目的功能和界面不变
+
+        **代码规范：**
+        - 禁止使用 "// ... 保持不变" 等省略写法
+        - 禁止使用 "// ... 其他代码" 等简化表达
+        - 算法实现必须完整，不得缩减
+        - 如果代码过长，分批次完整返回
+    compress_notice: |
+        注意：代码已经过压缩处理，建议使用前先格式化。
+    ultra_compress_notice: |
+        注意：代码已经过深度压缩，使用前必须格式化，否则可读性较差。
+    continue_notice: |
+        当前内容未完，请等待后续部分。
+    complete_notice: |
+        全部内容已展示完毕。
+    project_separator: |4
+        ---
+
+        以上是项目 **%s** 的完整内容。
+
+        ---
+    file_info_format: '**类型**: %s | **行数**: %d | **大小**: %s'
+    non_code_file_notice: 此文件为配置/文档类型，非可执行代码
+    binary_file_skip: 跳过二进制文件
+    stats_table_header: |
+        | 指标 | 数值 |
+        |------|------|
+    usage_instructions: |
+        ## 使用说明
+
+        1. 本文档共分为 %d 个部分
+        2. 请按顺序发送给 AI 助手
+        3. 每个部分可独立阅读，内容连续
+        4. 建议开始时说明这是分段发送的项目代码

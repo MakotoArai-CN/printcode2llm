@@ -1,0 +1,297 @@
+# PrintCode2LLM 默认配置
+
+# 文件类型映射
+language_map:
+  .js: javascript
+  .jsx: javascript
+  .ts: typescript
+  .tsx: typescript
+  .py: python
+  .java: java
+  .c: c
+  .cpp: cpp
+  .h: c
+  .hpp: cpp
+  .go: go
+  .rs: rust
+  .swift: swift
+  .kt: kotlin
+  .dart: dart
+  .rb: ruby
+  .php: php
+  .html: html
+  .css: css
+  .scss: scss
+  .less: less
+  .json: json
+  .xml: xml
+  .yml: yaml
+  .yaml: yaml
+  .toml: toml
+  .ini: ini
+  .sh: shell
+  .bash: shell
+  .ps1: powershell
+  .sql: sql
+  .md: markdown
+  .txt: text
+  .vue: vue
+  .svelte: svelte
+
+# 默认忽略规则
+default_ignore:
+  # 依赖目录
+  - node_modules
+  - vendor
+  - venv
+  - .venv
+  - env
+  - .env
+  - __pycache__
+  
+  # 版本控制
+  - .git
+  - .svn
+  - .hg
+  
+  # IDE
+  - .vscode
+  - .idea
+  - .vs
+  - .eclipse
+  
+  # 构建产物
+  - dist
+  - dist-*
+  - build
+  - out
+  - bin
+  - target
+  - coverage
+  - .gradle
+  
+  # 平台相关
+  - .DS_Store
+  - Thumbs.db
+  - desktop.ini
+  
+  # 资源文件
+  - assets
+  - static
+  - public
+  
+  # 文档
+  - doc
+  - docs
+  
+  # 配置和锁文件
+  - package-lock.json
+  - yarn.lock
+  - Gemfile.lock
+  - Cargo.lock
+  - go.sum
+  
+  # 日志
+  - "*.log"
+  - logs
+  
+  # 临时文件
+  - tmp
+  - temp
+  - .cache
+  - "*.tmp"
+  - "*.bak"
+  - "*.swp"
+  - "*.swo"
+  - "*.swn"
+  - "*.old"
+  
+  # 输出文件
+  - "LLM_CODE*.md"
+
+# 二进制和媒体文件扩展名
+binary_extensions:
+  # 图片
+  - .jpg
+  - .jpeg
+  - .png
+  - .gif
+  - .bmp
+  - .svg
+  - .ico
+  - .webp
+  - .tiff
+  - .tif
+  - .psd
+  - .ai
+  - .eps
+  - .raw
+  - .cr2
+  - .nef
+  - .heic
+  - .heif
+  
+  # 视频
+  - .mp4
+  - .avi
+  - .mov
+  - .wmv
+  - .flv
+  - .mkv
+  - .webm
+  - .m4v
+  - .3gp
+  - .mpg
+  - .mpeg
+  - .vob
+  - .ogv
+  
+  # 音频
+  - .mp3
+  - .wav
+  - .ogg
+  - .flac
+  - .aac
+  - .m4a
+  - .wma
+  - .ape
+  - .alac
+  - .opus
+  - .mid
+  - .midi
+  
+  # 文档
+  - .pdf
+  - .doc
+  - .docx
+  - .ppt
+  - .pptx
+  - .xls
+  - .xlsx
+  - .odt
+  - .ods
+  - .odp
+  - .pages
+  - .numbers
+  - .key
+  
+  # 压缩包
+  - .zip
+  - .tar
+  - .gz
+  - .rar
+  - .7z
+  - .iso
+  - .dmg
+  - .tgz
+  - .bz2
+  - .xz
+  - .cab
+  - .deb
+  - .rpm
+  - .pkg
+  - .msi
+  
+  # 可执行文件
+  - .exe
+  - .dll
+  - .so
+  - .dylib
+  - .lib
+  - .a
+  - .app
+  - .bat
+  - .cmd
+  - .com
+  
+  # 包文件
+  - .jar
+  - .war
+  - .ear
+  - .apk
+  - .ipa
+  - .aab
+  - .aar
+  - .nupkg
+  - .snap
+  
+  # 模型文件
+  - .pth
+  - .pt
+  - .onnx
+  - .pb
+  - .tflite
+  - .h5
+  - .hdf5
+  - .caffemodel
+  - .mlmodel
+  - .savedmodel
+  
+  # 编译产物
+  - .pyc
+  - .pyd
+  - .o
+  - .obj
+  - .class
+  - .wasm
+  - .elc
+  - .rbc
+  
+  # 字体文件
+  - .ttf
+  - .otf
+  - .woff
+  - .woff2
+  - .eot
+  - .fon
+  - .fnt
+  
+  # 数据库文件
+  - .db
+  - .sqlite
+  - .sqlite3
+  - .mdb
+  - .accdb
+  - .frm
+  - .ibd
+  - .dbf
+  
+  # 其他二进制格式
+  - .parquet
+  - .feather
+  - .arrow
+  - .avro
+  - .protobuf
+  - .msgpack
+  - .pickle
+  - .pkl
+  - .npy
+  - .npz
+  - .mat
+  - .rds
+  - .rda
+  - .RData
+
+# 非代码文件扩展名（文本文件但不是代码）
+non_code_extensions:
+  - .md
+  - .txt
+  - .log
+  - .csv
+  - .json
+  - .xml
+  - .yml
+  - .yaml
+  - .toml
+  - .ini
+  - .conf
+  - .config
+
+# 默认设置
+defaults:
+  max_chars: 50000
+  compress: true
+  ultra_compress: false
+  split_mode: file
+  include_tree: true
+  output_prefix: LLM_CODE
