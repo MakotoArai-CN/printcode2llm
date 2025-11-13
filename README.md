@@ -238,7 +238,7 @@ gofmt -w file.go
 
 ## License
 
-MIT
+[AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)
 
 ## 贡献
 
