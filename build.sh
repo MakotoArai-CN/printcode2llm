@@ -3,7 +3,7 @@
 BINARY_NAME=ptlm
 MAIN_PATH=cmd/ptlm/main.go
 BUILD_DIR=build
-VERSION=1.0.0
+VERSION=1.0.1
 LDFLAGS="-ldflags -s -w -X printcode2llm/internal/version.Version=$VERSION"
 
 build_windows() {

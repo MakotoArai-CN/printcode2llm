@@ -5,7 +5,7 @@ setlocal
 set BINARY_NAME=ptlm
 set MAIN_PATH=cmd\ptlm\main.go
 set BUILD_DIR=build
-set VERSION=1.0.0
+set VERSION=1.0.1
 set LDFLAGS=-ldflags "-s -w -X printcode2llm/internal/version.Version=%VERSION%"
 
 if "%1"=="" goto all
