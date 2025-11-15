@@ -4,50 +4,15 @@ import (
 	"os"
 	"path/filepath"
 
+	"printcode2llm/configs"
+
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	LanguageMap       map[string]string `yaml:"language_map"`
-	DefaultIgnore     []string          `yaml:"default_ignore"`
-	BinaryExtensions  []string          `yaml:"binary_extensions"`
-	NonCodeExtensions []string          `yaml:"non_code_extensions"`
-	CustomIgnore      CustomIgnore      `yaml:"custom_ignore"`
-	Output            Output            `yaml:"output"`
-	Prompts           Prompts           `yaml:"prompts"`
-}
-
-type CustomIgnore struct {
-	Patterns []string `yaml:"patterns"`
-	Regex    []string `yaml:"regex"`
-}
-
-type Output struct {
-	MaxChars      int    `yaml:"max_chars"`
-	Compress      bool   `yaml:"compress"`
-	UltraCompress bool   `yaml:"ultra_compress"`
-	SplitMode     string `yaml:"split_mode"`
-	IncludeTree   bool   `yaml:"include_tree"`
-	OutputPrefix  string `yaml:"output_prefix"`
-}
-
-type Prompts struct {
-	SectionInfo         string `yaml:"section_info"`
-	SectionTree         string `yaml:"section_tree"`
-	SectionCode         string `yaml:"section_code"`
-	SectionStats        string `yaml:"section_stats"`
-	HeaderPrompt        string `yaml:"header_prompt"`
-	CompressNotice      string `yaml:"compress_notice"`
-	UltraCompressNotice string `yaml:"ultra_compress_notice"`
-	ContinueNotice      string `yaml:"continue_notice"`
-	CompleteNotice      string `yaml:"complete_notice"`
-	ProjectSeparator    string `yaml:"project_separator"`
-	FileInfoFormat      string `yaml:"file_info_format"`
-	NonCodeFileNotice   string `yaml:"non_code_file_notice"`
-	BinaryFileSkip      string `yaml:"binary_file_skip"`
-	StatsTableHeader    string `yaml:"stats_table_header"`
-	UsageInstructions   string `yaml:"usage_instructions"`
-}
+type Config = configs.Config
+type CustomIgnore = configs.CustomIgnore
+type Output = configs.Output
+type Prompts = configs.Prompts
 
 var userConfigPath string
 
@@ -56,22 +21,26 @@ func SetConfigPath(path string) {
 }
 
 func Load() (*Config, error) {
-	cfg := Default()
-
 	if userConfigPath != "" {
 		return LoadFrom(userConfigPath)
 	}
 
 	userCfgPath := ".ptlm.yaml"
 	if _, err := os.Stat(userCfgPath); err == nil {
-		userCfg, err := LoadFrom(userCfgPath)
-		if err != nil {
-			return nil, err
+		cfg, err := LoadFrom(userCfgPath)
+		if err == nil {
+			return cfg, nil
 		}
-		merge(cfg, userCfg)
 	}
 
-	return cfg, nil
+	if configs.HasEmbedded() {
+		cfg, err := configs.LoadEmbedded()
+		if err == nil {
+			return cfg, nil
+		}
+	}
+
+	return Default(), nil
 }
 
 func LoadFrom(path string) (*Config, error) {
@@ -85,9 +54,15 @@ func LoadFrom(path string) (*Config, error) {
 		return nil, err
 	}
 
-	baseCfg := Default()
-	merge(baseCfg, &cfg)
+	var baseCfg *Config
+	if configs.HasEmbedded() {
+		baseCfg, _ = configs.LoadEmbedded()
+	}
+	if baseCfg == nil {
+		baseCfg = Default()
+	}
 
+	merge(baseCfg, &cfg)
 	return baseCfg, nil
 }
 
@@ -124,14 +99,42 @@ func Default() *Config {
 		},
 	}
 
-	defaultPath := "configs/default.yaml"
-	if data, err := os.ReadFile(defaultPath); err == nil {
-		yaml.Unmarshal(data, cfg)
+	cfg.LanguageMap = map[string]string{
+		".js":   "javascript",
+		".ts":   "typescript",
+		".py":   "python",
+		".go":   "go",
+		".java": "java",
+		".cpp":  "cpp",
+		".c":    "c",
+		".rs":   "rust",
+		".php":  "php",
+		".rb":   "ruby",
+		".md":   "markdown",
+		".json": "json",
+		".yaml": "yaml",
+		".yml":  "yaml",
 	}
 
-	promptsPath := "configs/prompts.yaml"
-	if data, err := os.ReadFile(promptsPath); err == nil {
-		yaml.Unmarshal(data, &cfg.Prompts)
+	cfg.DefaultIgnore = []string{
+		"node_modules",
+		"vendor",
+		".git",
+		".vscode",
+		".idea",
+		"dist",
+		"build",
+		"LLM_CODE*.md",
+	}
+
+	cfg.BinaryExtensions = []string{
+		".exe",
+		".dll",
+		".so",
+		".jpg",
+		".png",
+		".pdf",
+		".zip",
 	}
 
 	return cfg

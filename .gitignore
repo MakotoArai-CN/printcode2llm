@@ -1,27 +1,42 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# 编译输出
+build/
+dist/
+
+# 可执行文件
+ptlm
+ptlm.exe
 *.exe
-*.exe~
 *.dll
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-go.work.sum
-
-# env file
-.env
-
+# 生成的输出文件
 LLM_CODE*.md
+
+# 用户配置文件（可选，根据需要调整）
+.ptlm.yaml
+
+# Go 相关
+*.test
+*.out
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.bak
+*.log
+
+# 测试覆盖
+*.coverprofile
+coverage.txt
+coverage.html

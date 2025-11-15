@@ -5,7 +5,7 @@
 
 ## 更好的面向AI Chat编程
 
-把项目代码整理成 Markdown，方便喂给大模型。项目没有任何破解，仅打印项目代码，大项目不建议使用本项目打印项目（例如总字符超过2 000 000字符）。
+把项目代码整理成 Markdown，方便喂给大模型。项目没有任何破解，仅打印项目代码，大项目不建议使用本项目打印项目（例如总字符超过2,000,000字符）。
 
 > 注意：直接执行`ptlm`默认打印执行目录下的所有代码文件，执行时请注意执行时机。
 
@@ -198,9 +198,9 @@ ptlm -f project.yaml ./myproject
 |        [lmarena.ai](https://lmarena.ai/)        |     全部     |   三方   |                                   119993                                   |
 |      [chat.qwen.ai](https://chat.qwen.ai/)      |   Qwen系列   |   官方   |           未知（代码量达到一定量时，发送的代码会以文件形式发送）           |
 |    [www.tongyi.com](https://www.tongyi.com/)    |   Qwen系列   |   官方   |           未知（代码量达到一定量时，发送的代码会以文件形式发送）           |
-|          [grok.com](https://grok.com)           |   Grok系列   |   官方   |   未知（貌似没有上限，但是单次最好不要超过2 000 000字符，浏览器会卡死）    |
+|          [grok.com](https://grok.com)           |   Grok系列   |   官方   |   未知（貌似没有上限，但是单次最好不要超过390,000字符，浏览器会卡死）    |
 | [chat.deepseek.com](https://chat.deepseek.com/) | Deepseek系列 |   官方   | ~300 000（代码量达到一定量时，直接上限，强制结束当前对话，必须开启新对话） |
-|    [www.doubao.com](https://www.doubao.com/)    |    Doubao    |   官方   |                  ~10 000（代码量达到一定量时，直接上限）                   |
+|    [www.doubao.com](https://www.doubao.com/)    |    Doubao    |   官方   |                  ~10,000（代码量达到一定量时，直接上限）                   |
 
 > 仅做简单估算，具体请自行测试。
 > 
