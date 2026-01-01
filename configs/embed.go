@@ -67,7 +67,7 @@ func LoadEmbedded() (*Config, error) {
 			MaxChars:      50000,
 			Compress:      true,
 			UltraCompress: false,
-			SplitMode:     "file",
+			SplitMode:     "char",
 			IncludeTree:   true,
 			OutputPrefix:  "LLM_CODE",
 		},
@@ -78,6 +78,7 @@ func LoadEmbedded() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err := yaml.Unmarshal(defaultData, cfg); err != nil {
 		return nil, err
 	}
@@ -86,6 +87,7 @@ func LoadEmbedded() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err := yaml.Unmarshal(promptsData, &cfg.Prompts); err != nil {
 		return nil, err
 	}

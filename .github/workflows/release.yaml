@@ -1,0 +1,288 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'internal/version/version.go'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      tag_exists: ${{ steps.check_tag.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from version.go
+        id: get_version
+        run: |
+          VERSION=$(grep 'Version = ' internal/version/version.go | sed 's/.*"\(.*\)"/\1/')
+          echo "version=v${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected version: v${VERSION}"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag does not exist, will create release"
+          fi
+
+  build:
+    needs: get-version
+    if: needs.get-version.outputs.tag_exists == 'false'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: windows
+            goarch: 386
+            suffix: .exe
+            name: windows-386
+          - os: ubuntu-latest
+            goos: windows
+            goarch: amd64
+            suffix: .exe
+            name: windows-amd64
+          - os: ubuntu-latest
+            goos: windows
+            goarch: arm64
+            suffix: .exe
+            name: windows-arm64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: 386
+            suffix: ""
+            name: linux-386
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            suffix: ""
+            name: linux-amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm
+            goarm: "7"
+            suffix: ""
+            name: linux-arm
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            suffix: ""
+            name: linux-arm64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: loong64
+            suffix: ""
+            name: linux-loong64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            suffix: ""
+            name: darwin-amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            suffix: ""
+            name: darwin-arm64
+          - os: ubuntu-latest
+            goos: freebsd
+            goarch: amd64
+            suffix: ""
+            name: freebsd-amd64
+          - os: ubuntu-latest
+            goos: freebsd
+            goarch: arm64
+            suffix: ""
+            name: freebsd-arm64
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+          cache: true
+
+      - name: Build binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
+        run: |
+          VERSION="${{ needs.get-version.outputs.version }}"
+          VERSION="${VERSION#v}"
+          OUTPUT_NAME="ptlm-${{ matrix.name }}${{ matrix.suffix }}"
+          
+          echo "Building ${OUTPUT_NAME} for ${{ matrix.goos }}/${{ matrix.goarch }}"
+          
+          go build -trimpath \
+            -ldflags "-s -w -X printcode2llm/internal/version.Version=${VERSION}" \
+            -o "${OUTPUT_NAME}" \
+            cmd/ptlm/main.go
+          
+          ls -lh "${OUTPUT_NAME}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ptlm-${{ matrix.name }}
+          path: ptlm-${{ matrix.name }}${{ matrix.suffix }}
+          retention-days: 7
+
+  release:
+    needs: [get-version, build]
+    if: always() && needs.get-version.outputs.tag_exists == 'false' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -name "ptlm-*" -exec mv {} release/ \;
+          cd release
+          
+          # Create checksums
+          sha256sum * > checksums.txt
+          
+          echo "Release files:"
+          ls -lh
+          echo ""
+          echo "Checksums:"
+          cat checksums.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --oneline --pretty=format:"- %s (%h)" | head -50)
+          else
+            COMMITS=$(git log ${PREV_TAG}..HEAD --oneline --pretty=format:"- %s (%h)")
+          fi
+          
+          COMMITS=$(echo "$COMMITS" | sed 's/@\([a-zA-Z0-9_-]*\)/`@\1`/g')
+          
+          VERSION="${{ needs.get-version.outputs.version }}"
+          REPO="${{ github.repository }}"
+          BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
+          
+          {
+            echo "CHANGELOG<<EOF"
+            echo "## 更新日志"
+            echo ""
+            echo "$COMMITS"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📦 下载"
+            echo ""
+            echo "| 平台 | 架构 | 下载 |"
+            echo "|:----:|:----:|:----:|"
+            echo "| ![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white) | x86 | [ptlm-windows-386.exe](${BASE_URL}/ptlm-windows-386.exe) |"
+            echo "| ![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white) | x64 | [ptlm-windows-amd64.exe](${BASE_URL}/ptlm-windows-amd64.exe) |"
+            echo "| ![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white) | ARM64 | [ptlm-windows-arm64.exe](${BASE_URL}/ptlm-windows-arm64.exe) |"
+            echo "| ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) | x86 | [ptlm-linux-386](${BASE_URL}/ptlm-linux-386) |"
+            echo "| ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) | x64 | [ptlm-linux-amd64](${BASE_URL}/ptlm-linux-amd64) |"
+            echo "| ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) | ARM | [ptlm-linux-arm](${BASE_URL}/ptlm-linux-arm) |"
+            echo "| ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) | ARM64 | [ptlm-linux-arm64](${BASE_URL}/ptlm-linux-arm64) |"
+            echo "| ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black) | LoongArch64 | [ptlm-linux-loong64](${BASE_URL}/ptlm-linux-loong64) |"
+            echo "| ![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white) | Intel | [ptlm-darwin-amd64](${BASE_URL}/ptlm-darwin-amd64) |"
+            echo "| ![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white) | Apple Silicon | [ptlm-darwin-arm64](${BASE_URL}/ptlm-darwin-arm64) |"
+            echo "| ![FreeBSD](https://img.shields.io/badge/FreeBSD-AB2B28?style=flat-square&logo=freebsd&logoColor=white) | x64 | [ptlm-freebsd-amd64](${BASE_URL}/ptlm-freebsd-amd64) |"
+            echo "| ![FreeBSD](https://img.shields.io/badge/FreeBSD-AB2B28?style=flat-square&logo=freebsd&logoColor=white) | ARM64 | [ptlm-freebsd-arm64](${BASE_URL}/ptlm-freebsd-arm64) |"
+            echo ""
+            echo "📋 [checksums.txt](${BASE_URL}/checksums.txt) - SHA256 校验文件"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 🚀 安装方法"
+            echo ""
+            echo "### Windows"
+            echo ""
+            echo "\`\`\`powershell"
+            echo "# 下载后直接运行安装"
+            echo "./ptlm-windows-amd64.exe install"
+            echo ""
+            echo "# 或手动添加到 PATH 后使用"
+            echo "ptlm --help"
+            echo "\`\`\`"
+            echo ""
+            echo "### Linux / macOS"
+            echo ""
+            echo "\`\`\`bash"
+            echo "# 下载对应平台版本"
+            echo "chmod +x ptlm-*"
+            echo ""
+            echo "# 安装到系统"
+            echo "./ptlm-* install"
+            echo ""
+            echo "# 或直接使用"
+            echo "./ptlm-* --help"
+            echo "\`\`\`"
+            echo ""
+            echo "### 一键安装 (Linux/macOS)"
+            echo ""
+            echo "\`\`\`bash"
+            echo "# Intel Mac / Linux x64"
+            echo "curl -fsSL ${BASE_URL}/ptlm-linux-amd64 -o ptlm && chmod +x ptlm && ./ptlm install"
+            echo ""
+            echo "# Apple Silicon"
+            echo "curl -fsSL ${BASE_URL}/ptlm-darwin-arm64 -o ptlm && chmod +x ptlm && ./ptlm install"
+            echo "\`\`\`"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📖 基本用法"
+            echo ""
+            echo "\`\`\`bash"
+            echo "# 整理当前目录代码"
+            echo "ptlm ."
+            echo ""
+            echo "# 整理指定目录"
+            echo "ptlm ./myproject"
+            echo ""
+            echo "# 限制每段字符数"
+            echo "ptlm -c 80000 ./project"
+            echo ""
+            echo "# 超级压缩模式"
+            echo "ptlm -u ./project"
+            echo "\`\`\`"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.get-version.outputs.version }}
+          name: Release ${{ needs.get-version.outputs.version }}
+          body: ${{ steps.changelog.outputs.CHANGELOG }}
+          draft: false
+          prerelease: false
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

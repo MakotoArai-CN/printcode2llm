@@ -9,7 +9,6 @@ import (
 
 var (
 	colorCyan   = color.New(color.FgCyan, color.Bold)
-	colorPink   = color.New(color.FgHiMagenta, color.Bold)
 	colorGreen  = color.New(color.FgGreen, color.Bold)
 	colorRed    = color.New(color.FgRed, color.Bold)
 	colorYellow = color.New(color.FgYellow)
@@ -19,25 +18,27 @@ var (
 
 func PrintHeader(text string) {
 	fmt.Println()
-	colorCyan.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-	
+	line := strings.Repeat("─", 50)
+	colorCyan.Println("┌" + line + "┐")
+
 	textLen := len([]rune(text))
-	lineLen := 40
-	padding := (lineLen - textLen) / 2
+	padding := (50 - textLen) / 2
 	if padding < 0 {
 		padding = 0
 	}
-	
+
+	colorCyan.Print("│")
 	fmt.Print(strings.Repeat(" ", padding))
-	colorPink.Printf("%s", text)
-	fmt.Println()
-	
-	colorCyan.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	colorCyan.Print(text)
+	fmt.Print(strings.Repeat(" ", 50-padding-textLen*2))
+	colorCyan.Println("│")
+
+	colorCyan.Println("└" + line + "┘")
 	fmt.Println()
 }
 
 func PrintSection(format string, args ...interface{}) {
-	colorBlue.Printf("▸ "+format+"\n", args...)
+	colorBlue.Printf("▶ "+format+"\n", args...)
 }
 
 func PrintInfo(format string, args ...interface{}) {
@@ -65,6 +66,7 @@ func FormatNumber(n int) string {
 	if len(str) <= 3 {
 		return str
 	}
+
 	var result []byte
 	for i, ch := range str {
 		if i > 0 && (len(str)-i)%3 == 0 {
@@ -80,6 +82,7 @@ func FormatBytes(size int64) string {
 	if size < unit {
 		return fmt.Sprintf("%d B", size)
 	}
+
 	div, exp := int64(unit), 0
 	for n := size / unit; n >= unit; n /= unit {
 		div *= unit
